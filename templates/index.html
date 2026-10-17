@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VoiceGuard: live call protection</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div id="alert" class="alert" role="alert" hidden></div>
+<header>
+  <h1>VoiceGuard</h1>
+  <p>Check whether a voice is real or AI-cloned. Protect a call as it happens, or check a recording you already have.</p>
+</header>
+<main>
+  <div class="row mrow"><label for="model" class="muted">Detector model</label><select id="model"></select>
+    <button class="btn" id="apply" type="button">Use this model</button><span id="mstat" class="muted small"></span></div>
+  <nav class="tabs" role="tablist"><button class="tab on" data-tab="live" role="tab">Live call</button><button class="tab" data-tab="file" role="tab">Check a file</button></nav>
+  <section class="panel" id="live">
+    <div class="row">
+      <label for="src" class="muted">Listen to</label>
+      <select id="src"><option value="mic">Microphone (phone call on speaker)</option><option value="tab">Tab or system audio (web call)</option></select>
+      <button class="btn primary" id="go" type="button">Start protection</button>
+    </div>
+    <div class="risk">
+      <div><div id="pct" class="pct">--</div><div id="lvl" class="muted">Not listening</div></div>
+      <div class="meter"><div id="fill"></div></div>
+    </div>
+    <div id="tl" class="tl" aria-label="Recent checks"></div>
+    <div class="row"><button class="btn" id="hear" type="button" disabled>Play the last 4 seconds I heard</button>
+      <label class="muted small"><input type="checkbox" id="clean"> Reduce noise in the browser (can add artifacts)</label></div>
+    <p class="muted small">Each bar is one 4-second check. A ringed bar was checked a second time with more context.</p>
+    <p id="err" class="err" role="alert"></p>
+    <h2 class="sub">VoiceGuard bot</h2>
+    <ul id="feed" class="feed" aria-live="polite"><li class="muted">Press Start protection and I'll begin listening.</li></ul>
+  </section>
+  <section class="panel" id="file" hidden>
+    <div class="row">
+      <label class="btn" for="ufile">Choose audio file</label><input id="ufile" type="file" accept="audio/*" hidden>
+      <span id="fname" class="muted">WAV, MP3, M4A or OGG. At least 3 seconds of speech works best.</span>
+    </div>
+    <div class="wave"><canvas id="wave" width="1000" height="160" role="img" aria-label="Waveform of the file"></canvas></div>
+    <audio id="player" controls hidden></audio>
+    <button class="btn primary" id="an" type="button" disabled>Analyze file</button>
+    <div id="res" class="res" hidden aria-live="polite">
+      <h2 id="rtitle"></h2><div class="meter"><div id="rfill"></div></div>
+      <p class="muted" id="rscore"></p><p id="radv"></p>
+      <p class="muted small">Red bands show each 4-second section. Sections that looked suspicious were checked a second time with more context.</p>
+    </div>
+    <p id="ferr" class="err" role="alert"></p>
+  </section>
+  <p id="demo" class="warn" hidden>Demo mode: the AI model isn't loaded, so scores are placeholders.</p>
+  <section class="panel">
+    <h2>Recent checks</h2>
+    <table><thead><tr><th>Type</th><th>Source</th><th>Length</th><th>Risk</th><th>Flags</th><th>When</th></tr></thead><tbody id="hist"></tbody></table>
+    <p id="empty" class="muted">No checks yet.</p>
+  </section>
+</main>
+<footer>Audio is analyzed in memory and never saved. Only the length, risk score and number of flags are stored. No detector is perfect, so verify urgent requests another way.</footer>
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
